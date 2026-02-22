@@ -1,4 +1,4 @@
--- ULTIMATE BASE WARFARE - ИСПРАВЛЕННАЯ ТЕЛЕФОННАЯ КНОПКА
+-- ULTIMATE BASE WARFARE - ПОЛНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -36,25 +36,17 @@ local teamBases = {
 -- Ключевые слова для поиска спавнеров
 local spawnerKeywords = {
     "spawn", "спавн", "spawner", "спавнер",
-    "generator", "генератор", "producer",
-    "factory", "фабрика", "base", "база",
-    "core", "ядро", "tower", "башня",
-    "turret", "турель", "reactor", "реактор",
-    "soldier", "солдат", "vehicle", "техника",
-    "supply", "снабжение", "respawn", "респавн"
+    "generator", "генератор", "base", "база"
 }
 
 -- Хранилище для ESP
 local espHighlights = {}
 
--- Кнопка для телефона
-local menuButton = nil
-
--- ==================== СОЗДАНИЕ КНОПКИ ДЛЯ ТЕЛЕФОНА ====================
+-- ==================== ТЕЛЕФОННАЯ КНОПКА ====================
 local function createMobileButton()
     if not TouchEnabled then return end
     
-    -- Удаляем старую кнопку если есть
+    -- Удаляем старую кнопку
     local oldGui = player:FindFirstChild("PlayerGui"):FindFirstChild("MobileMenuButton")
     if oldGui then oldGui:Destroy() end
     
@@ -66,49 +58,30 @@ local function createMobileButton()
     buttonGui.DisplayOrder = 999
     buttonGui.IgnoreGuiInset = true
     
-    menuButton = Instance.new("TextButton")
+    local menuButton = Instance.new("TextButton")
     menuButton.Parent = buttonGui
-    menuButton.Size = UDim2.new(0, 50, 0, 50)  -- Маленькая кнопка 50x50
-    menuButton.Position = UDim2.new(0.9, -25, 0.1, 25)  -- В правом верхнем углу
-    menuButton.BackgroundColor3 = Color3.fromRGB(70, 130, 200)  -- Синий
+    menuButton.Size = UDim2.new(0, 50, 0, 50)
+    menuButton.Position = UDim2.new(0.9, -25, 0.1, 25)
+    menuButton.BackgroundColor3 = Color3.fromRGB(70, 130, 200)
     menuButton.Text = "⚡"
     menuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     menuButton.TextSize = 30
     menuButton.Font = Enum.Font.GothamBold
     menuButton.BorderSizePixel = 0
-    menuButton.Draggable = true  -- Можно перетаскивать
+    menuButton.Draggable = true
     menuButton.Active = true
     menuButton.ZIndex = 1000
     
-    -- Скругленные углы
     local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 25)  -- Круглая кнопка
+    btnCorner.CornerRadius = UDim.new(0, 25)
     btnCorner.Parent = menuButton
     
-    -- Тень
-    local shadow = Instance.new("ImageLabel")
-    shadow.Parent = menuButton
-    shadow.BackgroundTransparency = 1
-    shadow.Size = UDim2.new(1, 10, 1, 10)
-    shadow.Position = UDim2.new(0, -5, 0, -5)
-    shadow.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-    shadow.ImageColor3 = Color3.new(0, 0, 0)
-    shadow.ImageTransparency = 0.5
-    shadow.ScaleType = Enum.ScaleType.Slice
-    shadow.SliceCenter = Rect.new(10, 10, 118, 118)
-    shadow.ZIndex = 999
-    
-    -- Функция открытия/закрытия меню
     local function toggleMenu()
         MainFrame.Visible = not MainFrame.Visible
     end
     
-    -- Обработка нажатия на телефоне
-    menuButton.MouseButton1Click:Connect(toggleMenu)  -- Для мыши
-    menuButton.TouchTap:Connect(toggleMenu)  -- Для касания
-    
-    -- Делаем кнопку всегда видимой
-    menuButton.Visible = true
+    menuButton.MouseButton1Click:Connect(toggleMenu)
+    menuButton.TouchTap:Connect(toggleMenu)
 end
 
 -- ==================== GUI ====================
@@ -120,7 +93,7 @@ ScreenGui.DisplayOrder = 998
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 400, 0, 550)  -- Поменьше для телефона
+MainFrame.Size = UDim2.new(0, 400, 0, 550)
 MainFrame.Position = UDim2.new(0.5, -200, 0.5, -275)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 MainFrame.BorderSizePixel = 0
@@ -166,6 +139,7 @@ CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.TextSize = 16
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.BorderSizePixel = 0
+CloseBtn.ZIndex = 21
 
 local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(0, 4)
@@ -180,37 +154,24 @@ if TouchEnabled then
     end)
 end
 
--- Контейнер с прокруткой (остальной код такой же как в предыдущей версии)
--- ... (здесь идет весь остальной код функций)
-
--- Создаем кнопку для телефона
-createMobileButton()
-
-print("✅ ULTIMATE WARFARE READY")
-if TouchEnabled then
-    print("   📱 Нажми на синюю кнопку ⚡ чтобы открыть меню")
-end
-
 -- Вкладки
 local TabFrame = Instance.new("Frame")
 TabFrame.Parent = MainFrame
 TabFrame.Size = UDim2.new(1, -20, 0, 40)
-TabFrame.Position = UDim2.new(0, 10, 0, 50)
+TabFrame.Position = UDim2.new(0, 10, 0, 45)
 TabFrame.BackgroundTransparency = 1
-TabFrame.ZIndex = 21
 
 local function createTab(name, pos, color)
     local tab = Instance.new("TextButton")
     tab.Parent = TabFrame
-    tab.Size = UDim2.new(0, 100, 0, 35)
+    tab.Size = UDim2.new(0, 90, 0, 35)
     tab.Position = UDim2.new(0, pos, 0, 0)
     tab.BackgroundColor3 = color
     tab.Text = name
     tab.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tab.TextSize = 14
+    tab.TextSize = 13
     tab.Font = Enum.Font.GothamBold
     tab.BorderSizePixel = 0
-    tab.ZIndex = 22
     
     local tabCorner = Instance.new("UICorner")
     tabCorner.CornerRadius = UDim.new(0, 6)
@@ -220,33 +181,30 @@ local function createTab(name, pos, color)
 end
 
 local tab1 = createTab("MAIN", 0, Color3.fromRGB(70, 130, 200))
-local tab2 = createTab("MOVEMENT", 105, Color3.fromRGB(60, 200, 60))
-local tab3 = createTab("COMBAT", 210, Color3.fromRGB(200, 60, 60))
-local tab4 = createTab("TROLL", 315, Color3.fromRGB(160, 60, 200))
+local tab2 = createTab("MOVE", 95, Color3.fromRGB(60, 200, 60))
+local tab3 = createTab("COMBAT", 190, Color3.fromRGB(200, 60, 60))
+local tab4 = createTab("TROLL", 285, Color3.fromRGB(160, 60, 200))
 
--- Контейнеры для вкладок
-local Container1 = Instance.new("ScrollingFrame") -- MAIN
-local Container2 = Instance.new("ScrollingFrame") -- MOVEMENT
-local Container3 = Instance.new("ScrollingFrame") -- COMBAT
-local Container4 = Instance.new("ScrollingFrame") -- TROLL
-
+-- Контейнеры
+local Container1 = Instance.new("ScrollingFrame")
+local Container2 = Instance.new("ScrollingFrame")
+local Container3 = Instance.new("ScrollingFrame")
+local Container4 = Instance.new("ScrollingFrame")
 local containers = {Container1, Container2, Container3, Container4}
 
 for i, container in ipairs(containers) do
     container.Parent = MainFrame
-    container.Size = UDim2.new(1, -20, 1, -100)
-    container.Position = UDim2.new(0, 10, 0, 95)
+    container.Size = UDim2.new(1, -20, 1, -95)
+    container.Position = UDim2.new(0, 10, 0, 90)
     container.BackgroundTransparency = 1
     container.BorderSizePixel = 0
     container.ScrollBarThickness = 4
-    container.ScrollBarImageColor3 = Color3.fromRGB(40, 40, 45)
     container.CanvasSize = UDim2.new(0, 0, 0, 0)
     container.Visible = (i == 1)
-    container.ZIndex = 21
     
     local layout = Instance.new("UIListLayout")
     layout.Parent = container
-    layout.Padding = UDim.new(0, 8)
+    layout.Padding = UDim.new(0, 5)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -254,7 +212,7 @@ for i, container in ipairs(containers) do
     end)
 end
 
--- Переключение вкладок с поддержкой телефона
+-- Переключение вкладок
 local function switchTab(index)
     for i, container in ipairs(containers) do
         container.Visible = (i == index)
@@ -289,7 +247,6 @@ local function createSection(container, title)
     section.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
     section.BorderSizePixel = 0
     section.AutomaticSize = Enum.AutomaticSize.Y
-    section.ZIndex = 22
 
     local sectionCorner = Instance.new("UICorner")
     sectionCorner.CornerRadius = UDim.new(0, 6)
@@ -297,7 +254,7 @@ local function createSection(container, title)
 
     local sectionTitle = Instance.new("TextLabel")
     sectionTitle.Parent = section
-    sectionTitle.Size = UDim2.new(1, -20, 0, 30)
+    sectionTitle.Size = UDim2.new(1, -20, 0, 25)
     sectionTitle.Position = UDim2.new(0, 10, 0, 5)
     sectionTitle.BackgroundTransparency = 1
     sectionTitle.Text = title
@@ -305,20 +262,17 @@ local function createSection(container, title)
     sectionTitle.TextSize = 14
     sectionTitle.Font = Enum.Font.GothamBold
     sectionTitle.TextXAlignment = Enum.TextXAlignment.Left
-    sectionTitle.ZIndex = 23
 
     local content = Instance.new("Frame")
     content.Parent = section
     content.Size = UDim2.new(1, -20, 0, 0)
-    content.Position = UDim2.new(0, 10, 0, 35)
+    content.Position = UDim2.new(0, 10, 0, 30)
     content.BackgroundTransparency = 1
     content.AutomaticSize = Enum.AutomaticSize.Y
-    content.ZIndex = 23
 
     local contentList = Instance.new("UIListLayout")
     contentList.Parent = content
     contentList.Padding = UDim.new(0, 5)
-    contentList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
     return content
 end
@@ -326,9 +280,8 @@ end
 local function createToggle(parent, text, callback)
     local frame = Instance.new("Frame")
     frame.Parent = parent
-    frame.Size = UDim2.new(1, 0, 0, 35)
+    frame.Size = UDim2.new(1, 0, 0, 30)
     frame.BackgroundTransparency = 1
-    frame.ZIndex = 24
 
     local label = Instance.new("TextLabel")
     label.Parent = frame
@@ -339,7 +292,6 @@ local function createToggle(parent, text, callback)
     label.TextSize = 13
     label.Font = Enum.Font.Gotham
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.ZIndex = 25
 
     local btn = Instance.new("TextButton")
     btn.Parent = frame
@@ -351,14 +303,12 @@ local function createToggle(parent, text, callback)
     btn.TextSize = 12
     btn.Font = Enum.Font.GothamBold
     btn.BorderSizePixel = 0
-    btn.ZIndex = 25
 
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 4)
     btnCorner.Parent = btn
 
     local state = false
-    
     local function toggle()
         state = not state
         btn.BackgroundColor3 = state and Color3.fromRGB(60, 200, 60) or Color3.fromRGB(40, 40, 45)
@@ -377,14 +327,13 @@ end
 local function createButton(parent, text, color, callback)
     local btn = Instance.new("TextButton")
     btn.Parent = parent
-    btn.Size = UDim2.new(1, 0, 0, 40)
+    btn.Size = UDim2.new(1, 0, 0, 35)
     btn.BackgroundColor3 = color
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 14
+    btn.TextSize = 13
     btn.Font = Enum.Font.GothamBold
     btn.BorderSizePixel = 0
-    btn.ZIndex = 25
 
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 6)
@@ -429,7 +378,6 @@ local function toggleFly()
             
             flyConnection = RunService.RenderStepped:Connect(function()
                 if not flyEnabled or not player.Character then
-                    toggleFly()
                     return
                 end
                 
@@ -534,7 +482,6 @@ end
 local function setSpeed(speed)
     if player.Character and player.Character:FindFirstChild("Humanoid") then
         player.Character.Humanoid.WalkSpeed = speed
-        player.Character.Humanoid.JumpPower = speed
     end
 end
 
@@ -548,8 +495,7 @@ end
 local function isPlayerAlive(character)
     if not character then return false end
     local humanoid = character:FindFirstChild("Humanoid")
-    if not humanoid then return false end
-    if humanoid.Health <= 0 then return false end
+    if not humanoid or humanoid.Health <= 0 then return false end
     return true
 end
 
@@ -563,26 +509,6 @@ local function createESP(char)
     highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Parent = char
-    
-    local head = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
-    if head then
-        local billboard = Instance.new("BillboardGui")
-        billboard.Adornee = head
-        billboard.Size = UDim2.new(0, 100, 0, 30)
-        billboard.StudsOffset = Vector3.new(0, 3, 0)
-        billboard.AlwaysOnTop = true
-        billboard.Parent = char
-        
-        local nameLabel = Instance.new("TextLabel")
-        nameLabel.Parent = billboard
-        nameLabel.Size = UDim2.new(1, 0, 1, 0)
-        nameLabel.BackgroundTransparency = 0.5
-        nameLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        nameLabel.Text = char.Name
-        nameLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-        nameLabel.TextSize = 14
-        nameLabel.Font = Enum.Font.GothamBold
-    end
     
     return highlight
 end
@@ -606,9 +532,8 @@ local function toggleESP()
     end
 end
 
--- ==================== БЫСТРЫЙ АВТО-КЛИКЕР ====================
+-- ==================== АВТО-КЛИКЕР ====================
 local clickConnection = nil
-local clickThread = nil
 
 local function toggleAutoClicker()
     autoClickerEnabled = not autoClickerEnabled
@@ -616,48 +541,18 @@ local function toggleAutoClicker()
     if autoClickerEnabled then
         notify("🔫 Auto-clicker ON (G)")
         
-        clickThread = coroutine.create(function()
-            while autoClickerEnabled do
-                for i = 1, 20 do
-                    mouse1click()
-                    mouse2click()
-                    
-                    if player.Character then
-                        for _, tool in ipairs(player.Character:GetChildren()) do
-                            if tool:IsA("Tool") then
-                                pcall(function()
-                                    tool:Activate()
-                                    if tool:FindFirstChild("ClickDetector") then
-                                        fireclickdetector(tool.ClickDetector)
-                                    end
-                                end)
-                            end
-                        end
-                    end
-                    
-                    wait(0.001)
-                end
-                wait(0.01)
-            end
-        end)
-        
-        coroutine.resume(clickThread)
-        
         clickConnection = RunService.Heartbeat:Connect(function()
             if autoClickerEnabled then
                 mouse1click()
-                wait(0.005)
+                mouse2click()
             end
         end)
-        
     else
         notify("🔫 Auto-clicker OFF")
-        autoClickerEnabled = false
         if clickConnection then
             clickConnection:Disconnect()
             clickConnection = nil
         end
-        clickThread = nil
     end
 end
 
@@ -669,7 +564,7 @@ local function findBombInHand()
         for _, tool in ipairs(player.Character:GetChildren()) do
             if tool:IsA("Tool") then
                 local name = tool.Name:lower()
-                if name:find("bomb") or name:find("boom") or name:find("tnt") or name:find("explosive") then
+                if name:find("bomb") or name:find("boom") or name:find("tnt") then
                     return tool
                 end
             end
@@ -678,7 +573,7 @@ local function findBombInHand()
     return nil
 end
 
-local function spawnBombAtTargetWithFlight()
+local function spawnBombAtTarget()
     if not teamBases[targetTeam] then return false end
     
     local bomb = findBombInHand()
@@ -689,18 +584,14 @@ local function spawnBombAtTargetWithFlight()
     if not myRoot then return false end
     
     local myPos = myRoot.Position
-    local baseY = targetPos.Y
-    local time = tick()
     
-    local heightOffset = math.sin(time * 3) * bombHeight
-    local flyPos = Vector3.new(targetPos.X, baseY + 30 + heightOffset, targetPos.Z)
-    
-    myRoot.CFrame = CFrame.new(flyPos)
+    myRoot.CFrame = CFrame.new(targetPos + Vector3.new(0, 10, 0))
     wait(0.1)
     
-    bomb:Activate()
-    mouse1click()
-    mouse2click()
+    -- Просто активируем бомбу без проверок
+    pcall(function()
+        bomb:Activate()
+    end)
     
     wait(0.1)
     myRoot.CFrame = CFrame.new(myPos)
@@ -718,17 +609,11 @@ local function toggleAutoBombs()
             return
         end
         
-        if not findBombInHand() then
-            notify("❌ Take a bomb in your hand!")
-            spawnBombsEnabled = false
-            return
-        end
-        
-        notify("💣 Auto bombs ON (B) - Flying up & down")
+        notify("💣 Auto bombs ON (B)")
         
         bombConnection = RunService.Heartbeat:Connect(function()
             if spawnBombsEnabled then
-                spawnBombAtTargetWithFlight()
+                spawnBombAtTarget()
                 wait(0.5)
             end
         end)
@@ -741,23 +626,18 @@ local function toggleAutoBombs()
     end
 end
 
--- ==================== SPAWNER DESTROYER ====================
+-- ==================== DESTROYER ====================
 local destroyConnection = nil
 local destroyedCount = 0
 
 local function isSpawner(obj)
     if not obj then return false end
-    
     local name = obj.Name:lower()
     for _, keyword in ipairs(spawnerKeywords) do
         if name:find(keyword) then
             return true
         end
     end
-    
-    if obj:IsA("SpawnLocation") then return true end
-    if obj:IsA("TeamSpawn") then return true end
-    
     return false
 end
 
@@ -765,24 +645,13 @@ local function destroySpawnersAtBase(basePos)
     local found = 0
     
     for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") or obj:IsA("Model") or obj:IsA("SpawnLocation") then
-            local objPos = nil
-            if obj:IsA("BasePart") then
-                objPos = obj.Position
-            elseif obj:IsA("Model") and obj:FindFirstChild("PrimaryPart") then
-                objPos = obj.PrimaryPart.Position
-            elseif obj:IsA("SpawnLocation") then
-                objPos = obj.Position
-            end
-            
-            if objPos and isSpawner(obj) then
-                local dist = (objPos - basePos).Magnitude
-                if dist < scanRadius then
-                    pcall(function()
-                        obj:Destroy()
-                        found = found + 1
-                    end)
-                end
+        if obj:IsA("BasePart") and isSpawner(obj) then
+            local dist = (obj.Position - basePos).Magnitude
+            if dist < scanRadius then
+                pcall(function()
+                    obj:Destroy()
+                    found = found + 1
+                end)
             end
         end
     end
@@ -820,7 +689,7 @@ local function toggleDestroyMode()
         end
         
         destroyedCount = 0
-        notify("💥 Destroy mode ON (X) - Target: " .. targetTeam)
+        notify("💥 Destroy mode ON (X)")
         
         destroyConnection = RunService.Heartbeat:Connect(function()
             if destroyModeEnabled then
@@ -852,7 +721,7 @@ local function teleportToBase(team)
     end
 end
 
--- ==================== TROLL FUNCTIONS ====================
+-- ==================== TROLL ====================
 local function findNearestPlayer()
     local closest = nil
     local closestDist = math.huge
@@ -887,14 +756,17 @@ local function freezePlayer(targetPlayer)
     end
 end
 
-local function unfreezePlayer(targetPlayer)
-    if targetPlayer and targetPlayer.Character then
-        for _, part in ipairs(targetPlayer.Character:GetChildren()) do
-            if part:IsA("BasePart") then
-                part.Anchored = false
+local function unfreezeAll()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character then
+            for _, part in ipairs(p.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.Anchored = false
+                end
             end
         end
     end
+    notify("✨ All unfrozen")
 end
 
 local function launchPlayer(targetPlayer)
@@ -907,164 +779,106 @@ end
 local function spinPlayer(targetPlayer)
     if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local root = targetPlayer.Character.HumanoidRootPart
-        for i = 1, 20 do
-            root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(18), 0)
+        for i = 1, 10 do
+            root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(36), 0)
             wait(0.05)
         end
     end
 end
 
-local function shrinkPlayer(targetPlayer)
-    if targetPlayer and targetPlayer.Character then
-        for _, part in ipairs(targetPlayer.Character:GetChildren()) do
-            if part:IsA("BasePart") then
-                part.Size = part.Size * 0.5
-            end
-        end
-        notify("🐁 Shrunk " .. targetPlayer.Name)
-    end
-end
+-- ==================== ИНТЕРФЕЙС ====================
 
--- ==================== СОЗДАНИЕ ИНТЕРФЕЙСА ====================
+-- MAIN TAB
+local mainSection1 = createSection(Container1, "TELEPORT")
 
--- ВКЛАДКА MAIN
-local mainSection1 = createSection(Container1, "BASE TELEPORT")
+local tpGrid = Instance.new("Frame")
+tpGrid.Parent = mainSection1
+tpGrid.Size = UDim2.new(1, 0, 0, 80)
+tpGrid.BackgroundTransparency = 1
 
-local teleportGrid = Instance.new("Frame")
-teleportGrid.Parent = mainSection1
-teleportGrid.Size = UDim2.new(1, 0, 0, 90)
-teleportGrid.BackgroundTransparency = 1
+local tpLayout = Instance.new("UIGridLayout")
+tpLayout.Parent = tpGrid
+tpLayout.CellSize = UDim2.new(0, 80, 0, 35)
+tpLayout.CellPadding = UDim2.new(0, 5, 0, 5)
 
-local teleportLayout = Instance.new("UIGridLayout")
-teleportLayout.Parent = teleportGrid
-teleportLayout.CellSize = UDim2.new(0, 80, 0, 40)
-teleportLayout.CellPadding = UDim2.new(0, 5, 0, 5)
+createButton(tpGrid, "RED", Color3.fromRGB(200, 60, 60), function() teleportToBase("Red") end)
+createButton(tpGrid, "BLUE", Color3.fromRGB(60, 60, 200), function() teleportToBase("Blue") end)
+createButton(tpGrid, "YELLOW", Color3.fromRGB(200, 200, 60), function() teleportToBase("Yellow") end)
+createButton(tpGrid, "GREEN", Color3.fromRGB(60, 200, 60), function() teleportToBase("Green") end)
 
-local tpRed = createButton(teleportGrid, "RED", Color3.fromRGB(200, 60, 60), function() teleportToBase("Red") end)
-tpRed.Size = UDim2.new(0, 80, 0, 40)
-local tpBlue = createButton(teleportGrid, "BLUE", Color3.fromRGB(60, 60, 200), function() teleportToBase("Blue") end)
-tpBlue.Size = UDim2.new(0, 80, 0, 40)
-local tpYellow = createButton(teleportGrid, "YELLOW", Color3.fromRGB(200, 200, 60), function() teleportToBase("Yellow") end)
-tpYellow.Size = UDim2.new(0, 80, 0, 40)
-local tpGreen = createButton(teleportGrid, "GREEN", Color3.fromRGB(60, 200, 60), function() teleportToBase("Green") end)
-tpGreen.Size = UDim2.new(0, 80, 0, 40)
+local mainSection2 = createSection(Container1, "MY TEAM")
+local myGrid = Instance.new("Frame")
+myGrid.Parent = mainSection2
+myGrid.Size = UDim2.new(1, 0, 0, 40)
+myGrid.BackgroundTransparency = 1
 
--- Team selection
-local teamSection1 = createSection(Container1, "MY TEAM")
-local teamGrid1 = Instance.new("Frame")
-teamGrid1.Parent = teamSection1
-teamGrid1.Size = UDim2.new(1, 0, 0, 45)
-teamGrid1.BackgroundTransparency = 1
+local myLayout = Instance.new("UIGridLayout")
+myLayout.Parent = myGrid
+myLayout.CellSize = UDim2.new(0, 70, 0, 35)
+myLayout.CellPadding = UDim2.new(0, 5, 0, 0)
 
-local teamLayout1 = Instance.new("UIGridLayout")
-teamLayout1.Parent = teamGrid1
-teamLayout1.CellSize = UDim2.new(0, 70, 0, 40)
-teamLayout1.CellPadding = UDim2.new(0, 5, 0, 0)
+createButton(myGrid, "RED", Color3.fromRGB(200, 60, 60), function() myTeam = "Red" end)
+createButton(myGrid, "BLUE", Color3.fromRGB(60, 60, 200), function() myTeam = "Blue" end)
+createButton(myGrid, "YELLOW", Color3.fromRGB(200, 200, 60), function() myTeam = "Yellow" end)
+createButton(myGrid, "GREEN", Color3.fromRGB(60, 200, 60), function() myTeam = "Green" end)
 
-local myRed = createButton(teamGrid1, "RED", Color3.fromRGB(200, 60, 60), function() myTeam = "Red" end)
-myRed.Size = UDim2.new(0, 70, 0, 40)
-local myBlue = createButton(teamGrid1, "BLUE", Color3.fromRGB(60, 60, 200), function() myTeam = "Blue" end)
-myBlue.Size = UDim2.new(0, 70, 0, 40)
-local myYellow = createButton(teamGrid1, "YELLOW", Color3.fromRGB(200, 200, 60), function() myTeam = "Yellow" end)
-myYellow.Size = UDim2.new(0, 70, 0, 40)
-local myGreen = createButton(teamGrid1, "GREEN", Color3.fromRGB(60, 200, 60), function() myTeam = "Green" end)
-myGreen.Size = UDim2.new(0, 70, 0, 40)
+local mainSection3 = createSection(Container1, "TARGET")
+local targetGrid = Instance.new("Frame")
+targetGrid.Parent = mainSection3
+targetGrid.Size = UDim2.new(1, 0, 0, 40)
+targetGrid.BackgroundTransparency = 1
 
-local teamSection2 = createSection(Container1, "TARGET TEAM")
-local teamGrid2 = Instance.new("Frame")
-teamGrid2.Parent = teamSection2
-teamGrid2.Size = UDim2.new(1, 0, 0, 45)
-teamGrid2.BackgroundTransparency = 1
+local targetLayout = Instance.new("UIGridLayout")
+targetLayout.Parent = targetGrid
+targetLayout.CellSize = UDim2.new(0, 70, 0, 35)
+targetLayout.CellPadding = UDim2.new(0, 5, 0, 0)
 
-local teamLayout2 = Instance.new("UIGridLayout")
-teamLayout2.Parent = teamGrid2
-teamLayout2.CellSize = UDim2.new(0, 70, 0, 40)
-teamLayout2.CellPadding = UDim2.new(0, 5, 0, 0)
+createButton(targetGrid, "RED", Color3.fromRGB(200, 60, 60), function() targetTeam = "Red" end)
+createButton(targetGrid, "BLUE", Color3.fromRGB(60, 60, 200), function() targetTeam = "Blue" end)
+createButton(targetGrid, "YELLOW", Color3.fromRGB(200, 200, 60), function() targetTeam = "Yellow" end)
+createButton(targetGrid, "GREEN", Color3.fromRGB(60, 200, 60), function() targetTeam = "Green" end)
 
-local targetRed = createButton(teamGrid2, "RED", Color3.fromRGB(200, 60, 60), function() targetTeam = "Red" end)
-targetRed.Size = UDim2.new(0, 70, 0, 40)
-local targetBlue = createButton(teamGrid2, "BLUE", Color3.fromRGB(60, 60, 200), function() targetTeam = "Blue" end)
-targetBlue.Size = UDim2.new(0, 70, 0, 40)
-local targetYellow = createButton(teamGrid2, "YELLOW", Color3.fromRGB(200, 200, 60), function() targetTeam = "Yellow" end)
-targetYellow.Size = UDim2.new(0, 70, 0, 40)
-local targetGreen = createButton(teamGrid2, "GREEN", Color3.fromRGB(60, 200, 60), function() targetTeam = "Green" end)
-targetGreen.Size = UDim2.new(0, 70, 0, 40)
+local mainSection4 = createSection(Container1, "AUTO")
+createToggle(mainSection4, "Auto Clicker (G)", function() toggleAutoClicker() end)
+createToggle(mainSection4, "Auto Bombs (B)", function() toggleAutoBombs() end)
+createToggle(mainSection4, "Destroyer (X)", function() toggleDestroyMode() end)
+createToggle(mainSection4, "ESP (H)", function() toggleESP() end)
 
--- Auto functions
-local mainSection2 = createSection(Container1, "AUTO FUNCTIONS")
-createToggle(mainSection2, "Auto Clicker (G)", function(state) 
-    if state then toggleAutoClicker() else toggleAutoClicker() end
-end)
-createToggle(mainSection2, "Auto Bombs (B)", function(state)
-    if state then toggleAutoBombs() else toggleAutoBombs() end
-end)
-createToggle(mainSection2, "Spawner Destroyer (X)", function(state)
-    if state then toggleDestroyMode() else toggleDestroyMode() end
-end)
+-- MOVEMENT TAB
+local moveSection = createSection(Container2, "MOVEMENT")
+createToggle(moveSection, "Fly (F)", function() toggleFly() end)
+createToggle(moveSection, "Noclip (N)", function() toggleNoclip() end)
+createToggle(moveSection, "Infinite Jump (J)", function() toggleInfiniteJump() end)
+createToggle(moveSection, "Super Speed", function() toggleSpeed() end)
 
--- ESP
-local mainSection3 = createSection(Container1, "VISUAL")
-createToggle(mainSection3, "ESP (H)", function(state) toggleESP() end)
+-- COMBAT TAB
+local combatSection = createSection(Container3, "COMBAT")
+createButton(combatSection, "Auto Clicker (G)", Color3.fromRGB(200, 60, 60), toggleAutoClicker)
+createButton(combatSection, "Auto Bombs (B)", Color3.fromRGB(200, 60, 60), toggleAutoBombs)
+createButton(combatSection, "Destroyer (X)", Color3.fromRGB(200, 60, 60), toggleDestroyMode)
+createButton(combatSection, "ESP (H)", Color3.fromRGB(70, 130, 200), toggleESP)
 
--- ВКЛАДКА MOVEMENT
-local moveSection1 = createSection(Container2, "MOVEMENT HACKS")
-createToggle(moveSection1, "Fly (F)", function(state) toggleFly() end)
-createToggle(moveSection1, "Noclip (N)", function(state) toggleNoclip() end)
-createToggle(moveSection1, "Infinite Jump (J)", function(state) toggleInfiniteJump() end)
-createToggle(moveSection1, "Super Speed", function(state) toggleSpeed() end)
-
--- ВКЛАДКА COMBAT
-local combatSection1 = createSection(Container3, "COMBAT")
-createButton(combatSection1, "🔫 Auto Clicker (G)", Color3.fromRGB(200, 60, 60), toggleAutoClicker)
-createButton(combatSection1, "💣 Auto Bombs (B)", Color3.fromRGB(200, 60, 60), toggleAutoBombs)
-createButton(combatSection1, "💥 Destroy Spawners (X)", Color3.fromRGB(200, 60, 60), toggleDestroyMode)
-createButton(combatSection1, "👁️ ESP (H)", Color3.fromRGB(70, 130, 200), toggleESP)
-
--- ВКЛАДКА TROLL
-local trollSection1 = createSection(Container4, "TROLL NEAREST PLAYER")
-
-createButton(trollSection1, "❄️ Freeze", Color3.fromRGB(60, 60, 200), function()
+-- TROLL TAB
+local trollSection = createSection(Container4, "TROLL")
+createButton(trollSection, "Freeze", Color3.fromRGB(60, 60, 200), function()
     local target = findNearestPlayer()
     if target then freezePlayer(target) end
 end)
-
-createButton(trollSection1, "🚀 Launch", Color3.fromRGB(200, 120, 60), function()
+createButton(trollSection, "Launch", Color3.fromRGB(200, 120, 60), function()
     local target = findNearestPlayer()
     if target then launchPlayer(target) end
 end)
-
-createButton(trollSection1, "🌀 Spin", Color3.fromRGB(160, 60, 200), function()
+createButton(trollSection, "Spin", Color3.fromRGB(160, 60, 200), function()
     local target = findNearestPlayer()
     if target then spinPlayer(target) end
 end)
+createButton(trollSection, "Unfreeze All", Color3.fromRGB(70, 130, 200), unfreezeAll)
 
-createButton(trollSection1, "🐁 Shrink", Color3.fromRGB(60, 200, 60), function()
-    local target = findNearestPlayer()
-    if target then shrinkPlayer(target) end
-end)
-
-createButton(trollSection1, "💀 Kill", Color3.fromRGB(200, 60, 60), function()
-    local target = findNearestPlayer()
-    if target and target.Character then
-        target.Character:BreakJoints()
-        notify("💀 Killed " .. target.Name)
-    end
-end)
-
-createButton(trollSection1, "✨ Unfreeze All", Color3.fromRGB(70, 130, 200), function()
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= player then
-            unfreezePlayer(p)
-        end
-    end
-    notify("✨ All unfrozen")
-end)
-
--- Radius control for destroyer
-local radiusSection = createSection(Container4, "DESTROYER RADIUS")
+-- Radius control
+local radiusSection = createSection(Container4, "RADIUS")
 local radiusFrame = Instance.new("Frame")
 radiusFrame.Parent = radiusSection
-radiusFrame.Size = UDim2.new(1, 0, 0, 40)
+radiusFrame.Size = UDim2.new(1, 0, 0, 35)
 radiusFrame.BackgroundTransparency = 1
 
 local radiusLabel = Instance.new("TextLabel")
@@ -1077,50 +891,14 @@ radiusLabel.TextSize = 14
 radiusLabel.Font = Enum.Font.GothamBold
 radiusLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-local radiusMinus = createButton(radiusFrame, "-", Color3.fromRGB(60, 60, 60), function()
+createButton(radiusFrame, "-", Color3.fromRGB(60, 60, 60), function()
     scanRadius = math.max(30, scanRadius - 10)
     radiusLabel.Text = "Radius: " .. scanRadius
 end)
-radiusMinus.Size = UDim2.new(0.2, 0, 0, 30)
-radiusMinus.Position = UDim2.new(0.6, 0, 0.5, -15)
-
-local radiusPlus = createButton(radiusFrame, "+", Color3.fromRGB(60, 60, 60), function()
+createButton(radiusFrame, "+", Color3.fromRGB(60, 60, 60), function()
     scanRadius = math.min(200, scanRadius + 10)
     radiusLabel.Text = "Radius: " .. scanRadius
 end)
-radiusPlus.Size = UDim2.new(0.2, 0, 0, 30)
-radiusPlus.Position = UDim2.new(0.8, 0, 0.5, -15)
-
--- Height control for bombs
-local heightSection = createSection(Container4, "BOMB FLIGHT HEIGHT")
-local heightFrame = Instance.new("Frame")
-heightFrame.Parent = heightSection
-heightFrame.Size = UDim2.new(1, 0, 0, 40)
-heightFrame.BackgroundTransparency = 1
-
-local heightLabel = Instance.new("TextLabel")
-heightLabel.Parent = heightFrame
-heightLabel.Size = UDim2.new(0.5, 0, 1, 0)
-heightLabel.BackgroundTransparency = 1
-heightLabel.Text = "Height: " .. bombHeight
-heightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-heightLabel.TextSize = 14
-heightLabel.Font = Enum.Font.GothamBold
-heightLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local heightMinus = createButton(heightFrame, "-", Color3.fromRGB(60, 60, 60), function()
-    bombHeight = math.max(10, bombHeight - 10)
-    heightLabel.Text = "Height: " .. bombHeight
-end)
-heightMinus.Size = UDim2.new(0.2, 0, 0, 30)
-heightMinus.Position = UDim2.new(0.6, 0, 0.5, -15)
-
-local heightPlus = createButton(heightFrame, "+", Color3.fromRGB(60, 60, 60), function()
-    bombHeight = math.min(100, bombHeight + 10)
-    heightLabel.Text = "Height: " .. bombHeight
-end)
-heightPlus.Size = UDim2.new(0.2, 0, 0, 30)
-heightPlus.Position = UDim2.new(0.8, 0, 0.5, -15)
 
 -- ==================== ГОРЯЧИЕ КЛАВИШИ ====================
 UserInputService.InputBegan:Connect(function(input)
@@ -1149,12 +927,12 @@ createMobileButton()
 print("✅ ULTIMATE WARFARE READY")
 print("   F1 - Menu")
 print("   G - Auto Clicker")
-print("   B - Auto Bombs (Flying up & down)")
+print("   B - Auto Bombs")
 print("   X - Destroy Spawners")
 print("   H - ESP")
 print("   F - Fly")
 print("   N - Noclip")
 print("   J - Infinite Jump")
 if TouchEnabled then
-    print("   ⚡ Blue button - Menu (Phone)")
+    print("   📱 Blue ⚡ button - Menu")
 end

@@ -1,4 +1,4 @@
--- ULTIMATE BASE WARFARE - ПОЛНАЯ ВЕРСИЯ С ГОРЯЧИМИ КЛАВИШАМИ
+-- ULTIMATE BASE WARFARE - ИСПРАВЛЕННАЯ ТЕЛЕФОННАЯ ВЕРСИЯ
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -54,29 +54,36 @@ local menuButton = nil
 local function createMobileButton()
     if not TouchEnabled then return end
     
+    -- Удаляем старую кнопку если есть
+    local oldGui = player:FindFirstChild("PlayerGui"):FindFirstChild("MobileMenuButton")
+    if oldGui then oldGui:Destroy() end
+    
     local buttonGui = Instance.new("ScreenGui")
     buttonGui.Name = "MobileMenuButton"
     buttonGui.Parent = player:WaitForChild("PlayerGui")
     buttonGui.ResetOnSpawn = false
     buttonGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    buttonGui.DisplayOrder = 999
     
     menuButton = Instance.new("TextButton")
     menuButton.Parent = buttonGui
-    menuButton.Size = UDim2.new(0, 60, 0, 60)
-    menuButton.Position = UDim2.new(0.9, -30, 0.1, 30)
+    menuButton.Size = UDim2.new(0, 70, 0, 70)
+    menuButton.Position = UDim2.new(0.85, -35, 0.1, 35)
     menuButton.BackgroundColor3 = Color3.fromRGB(70, 130, 200)
     menuButton.Text = "⚡"
     menuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    menuButton.TextSize = 30
+    menuButton.TextSize = 40
     menuButton.Font = Enum.Font.GothamBold
     menuButton.BorderSizePixel = 0
     menuButton.Draggable = true
     menuButton.Active = true
+    menuButton.ZIndex = 10
     
     local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 30)
+    btnCorner.CornerRadius = UDim.new(0, 35)
     btnCorner.Parent = menuButton
     
+    -- Тень
     local shadow = Instance.new("ImageLabel")
     shadow.Parent = menuButton
     shadow.BackgroundTransparency = 1
@@ -89,9 +96,21 @@ local function createMobileButton()
     shadow.SliceCenter = Rect.new(10, 10, 118, 118)
     shadow.ZIndex = 0
     
-    menuButton.MouseButton1Click:Connect(function()
+    -- Обработка касания для телефона
+    local function toggleMenu()
         MainFrame.Visible = not MainFrame.Visible
-    end)
+    end
+    
+    -- Для телефона используем TouchTap
+    if TouchEnabled then
+        menuButton.TouchTap:Connect(toggleMenu)
+    end
+    
+    -- Для ПК/мыши
+    menuButton.MouseButton1Click:Connect(toggleMenu)
+    
+    -- Делаем кнопку всегда видимой
+    menuButton.Visible = true
 end
 
 -- ==================== GUI ====================
@@ -99,6 +118,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "UltimateWarfare"
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 998
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
@@ -109,6 +129,7 @@ MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = false
+MainFrame.ZIndex = 20
 
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 8)
@@ -120,6 +141,7 @@ TitleBar.Parent = MainFrame
 TitleBar.Size = UDim2.new(1, 0, 0, 45)
 TitleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
 TitleBar.BorderSizePixel = 0
+TitleBar.ZIndex = 21
 
 local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 8)
@@ -135,6 +157,7 @@ Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 20
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 22
 
 -- Кнопка закрытия
 local CloseBtn = Instance.new("TextButton")
@@ -147,11 +170,18 @@ CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.TextSize = 18
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.BorderSizePixel = 0
+CloseBtn.ZIndex = 22
 
 local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(0, 6)
 CloseCorner.Parent = CloseBtn
 
+-- Обработка закрытия для телефона
+if TouchEnabled then
+    CloseBtn.TouchTap:Connect(function()
+        MainFrame.Visible = false
+    end)
+end
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
 end)
@@ -162,6 +192,7 @@ TabFrame.Parent = MainFrame
 TabFrame.Size = UDim2.new(1, -20, 0, 40)
 TabFrame.Position = UDim2.new(0, 10, 0, 50)
 TabFrame.BackgroundTransparency = 1
+TabFrame.ZIndex = 21
 
 local function createTab(name, pos, color)
     local tab = Instance.new("TextButton")
@@ -174,6 +205,7 @@ local function createTab(name, pos, color)
     tab.TextSize = 14
     tab.Font = Enum.Font.GothamBold
     tab.BorderSizePixel = 0
+    tab.ZIndex = 22
     
     local tabCorner = Instance.new("UICorner")
     tabCorner.CornerRadius = UDim.new(0, 6)
@@ -205,6 +237,7 @@ for i, container in ipairs(containers) do
     container.ScrollBarImageColor3 = Color3.fromRGB(40, 40, 45)
     container.CanvasSize = UDim2.new(0, 0, 0, 0)
     container.Visible = (i == 1)
+    container.ZIndex = 21
     
     local layout = Instance.new("UIListLayout")
     layout.Parent = container
@@ -216,34 +249,24 @@ for i, container in ipairs(containers) do
     end)
 end
 
--- Переключение вкладок
-tab1.MouseButton1Click:Connect(function()
-    Container1.Visible = true
-    Container2.Visible = false
-    Container3.Visible = false
-    Container4.Visible = false
-end)
+-- Переключение вкладок с поддержкой телефона
+local function switchTab(index)
+    for i, container in ipairs(containers) do
+        container.Visible = (i == index)
+    end
+end
 
-tab2.MouseButton1Click:Connect(function()
-    Container1.Visible = false
-    Container2.Visible = true
-    Container3.Visible = false
-    Container4.Visible = false
-end)
+tab1.MouseButton1Click:Connect(function() switchTab(1) end)
+tab2.MouseButton1Click:Connect(function() switchTab(2) end)
+tab3.MouseButton1Click:Connect(function() switchTab(3) end)
+tab4.MouseButton1Click:Connect(function() switchTab(4) end)
 
-tab3.MouseButton1Click:Connect(function()
-    Container1.Visible = false
-    Container2.Visible = false
-    Container3.Visible = true
-    Container4.Visible = false
-end)
-
-tab4.MouseButton1Click:Connect(function()
-    Container1.Visible = false
-    Container2.Visible = false
-    Container3.Visible = false
-    Container4.Visible = true
-end)
+if TouchEnabled then
+    tab1.TouchTap:Connect(function() switchTab(1) end)
+    tab2.TouchTap:Connect(function() switchTab(2) end)
+    tab3.TouchTap:Connect(function() switchTab(3) end)
+    tab4.TouchTap:Connect(function() switchTab(4) end)
+end
 
 -- ==================== ФУНКЦИИ ====================
 local function notify(text)
@@ -261,6 +284,7 @@ local function createSection(container, title)
     section.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
     section.BorderSizePixel = 0
     section.AutomaticSize = Enum.AutomaticSize.Y
+    section.ZIndex = 22
 
     local sectionCorner = Instance.new("UICorner")
     sectionCorner.CornerRadius = UDim.new(0, 6)
@@ -276,6 +300,7 @@ local function createSection(container, title)
     sectionTitle.TextSize = 14
     sectionTitle.Font = Enum.Font.GothamBold
     sectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+    sectionTitle.ZIndex = 23
 
     local content = Instance.new("Frame")
     content.Parent = section
@@ -283,6 +308,7 @@ local function createSection(container, title)
     content.Position = UDim2.new(0, 10, 0, 35)
     content.BackgroundTransparency = 1
     content.AutomaticSize = Enum.AutomaticSize.Y
+    content.ZIndex = 23
 
     local contentList = Instance.new("UIListLayout")
     contentList.Parent = content
@@ -297,6 +323,7 @@ local function createToggle(parent, text, callback)
     frame.Parent = parent
     frame.Size = UDim2.new(1, 0, 0, 35)
     frame.BackgroundTransparency = 1
+    frame.ZIndex = 24
 
     local label = Instance.new("TextLabel")
     label.Parent = frame
@@ -307,6 +334,7 @@ local function createToggle(parent, text, callback)
     label.TextSize = 13
     label.Font = Enum.Font.Gotham
     label.TextXAlignment = Enum.TextXAlignment.Left
+    label.ZIndex = 25
 
     local btn = Instance.new("TextButton")
     btn.Parent = frame
@@ -318,18 +346,25 @@ local function createToggle(parent, text, callback)
     btn.TextSize = 12
     btn.Font = Enum.Font.GothamBold
     btn.BorderSizePixel = 0
+    btn.ZIndex = 25
 
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 4)
     btnCorner.Parent = btn
 
     local state = false
-    btn.MouseButton1Click:Connect(function()
+    
+    local function toggle()
         state = not state
         btn.BackgroundColor3 = state and Color3.fromRGB(60, 200, 60) or Color3.fromRGB(40, 40, 45)
         btn.Text = state and "ON" or "OFF"
         callback(state)
-    end)
+    end
+    
+    btn.MouseButton1Click:Connect(toggle)
+    if TouchEnabled then
+        btn.TouchTap:Connect(toggle)
+    end
 
     return frame
 end
@@ -344,17 +379,23 @@ local function createButton(parent, text, color, callback)
     btn.TextSize = 14
     btn.Font = Enum.Font.GothamBold
     btn.BorderSizePixel = 0
+    btn.ZIndex = 25
 
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 6)
     btnCorner.Parent = btn
 
-    btn.MouseButton1Click:Connect(function()
+    local function handleClick()
         callback()
         btn.BackgroundColor3 = color:lerp(Color3.new(1, 1, 1), 0.2)
         wait(0.1)
         btn.BackgroundColor3 = color
-    end)
+    end
+    
+    btn.MouseButton1Click:Connect(handleClick)
+    if TouchEnabled then
+        btn.TouchTap:Connect(handleClick)
+    end
 
     return btn
 end
@@ -1110,5 +1151,5 @@ print("   F - Fly")
 print("   N - Noclip")
 print("   J - Infinite Jump")
 if TouchEnabled then
-    print("   ⚡ Button - Menu (Phone)")
+    print("   ⚡ Blue button - Menu (Phone)")
 end

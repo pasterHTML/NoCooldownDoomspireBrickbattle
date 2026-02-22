@@ -1,0 +1,1114 @@
+-- ULTIMATE BASE WARFARE - ПОЛНАЯ ВЕРСИЯ С ГОРЯЧИМИ КЛАВИШАМИ
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local camera = workspace.CurrentCamera
+local mouse = player:GetMouse()
+local TouchEnabled = UserInputService.TouchEnabled
+
+-- ==================== ПЕРЕМЕННЫЕ ====================
+local spawnBombsEnabled = false
+local autoClickerEnabled = false
+local flyEnabled = false
+local noclipEnabled = false
+local infiniteJumpEnabled = false
+local speedEnabled = false
+local espEnabled = false
+local destroyModeEnabled = false
+
+local myTeam = "Red"
+local targetTeam = "Blue"
+local flySpeed = 100
+local walkSpeed = 100
+local jumpPower = 100
+local scanRadius = 100
+local bombHeight = 50
+
+-- КООРДИНАТЫ БАЗ
+local teamBases = {
+    Red = Vector3.new(-130.1, 86.0, -0.2),
+    Green = Vector3.new(0.2, 86.0, -131.5),
+    Yellow = Vector3.new(130.5, 86.0, 0.0),
+    Blue = Vector3.new(-0.3, 65.6, 131.2)
+}
+
+-- Ключевые слова для поиска спавнеров
+local spawnerKeywords = {
+    "spawn", "спавн", "spawner", "спавнер",
+    "generator", "генератор", "producer",
+    "factory", "фабрика", "base", "база",
+    "core", "ядро", "tower", "башня",
+    "turret", "турель", "reactor", "реактор",
+    "soldier", "солдат", "vehicle", "техника",
+    "supply", "снабжение", "respawn", "респавн"
+}
+
+-- Хранилище для ESP
+local espHighlights = {}
+
+-- Кнопка для телефона
+local menuButton = nil
+
+-- ==================== СОЗДАНИЕ КНОПКИ ДЛЯ ТЕЛЕФОНА ====================
+local function createMobileButton()
+    if not TouchEnabled then return end
+    
+    local buttonGui = Instance.new("ScreenGui")
+    buttonGui.Name = "MobileMenuButton"
+    buttonGui.Parent = player:WaitForChild("PlayerGui")
+    buttonGui.ResetOnSpawn = false
+    buttonGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    menuButton = Instance.new("TextButton")
+    menuButton.Parent = buttonGui
+    menuButton.Size = UDim2.new(0, 60, 0, 60)
+    menuButton.Position = UDim2.new(0.9, -30, 0.1, 30)
+    menuButton.BackgroundColor3 = Color3.fromRGB(70, 130, 200)
+    menuButton.Text = "⚡"
+    menuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    menuButton.TextSize = 30
+    menuButton.Font = Enum.Font.GothamBold
+    menuButton.BorderSizePixel = 0
+    menuButton.Draggable = true
+    menuButton.Active = true
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 30)
+    btnCorner.Parent = menuButton
+    
+    local shadow = Instance.new("ImageLabel")
+    shadow.Parent = menuButton
+    shadow.BackgroundTransparency = 1
+    shadow.Size = UDim2.new(1, 10, 1, 10)
+    shadow.Position = UDim2.new(0, -5, 0, -5)
+    shadow.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+    shadow.ImageColor3 = Color3.new(0, 0, 0)
+    shadow.ImageTransparency = 0.5
+    shadow.ScaleType = Enum.ScaleType.Slice
+    shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+    shadow.ZIndex = 0
+    
+    menuButton.MouseButton1Click:Connect(function()
+        MainFrame.Visible = not MainFrame.Visible
+    end)
+end
+
+-- ==================== GUI ====================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "UltimateWarfare"
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Parent = ScreenGui
+MainFrame.Size = UDim2.new(0, 450, 0, 650)
+MainFrame.Position = UDim2.new(0.5, -225, 0.5, -325)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Visible = false
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 8)
+MainCorner.Parent = MainFrame
+
+-- Заголовок
+local TitleBar = Instance.new("Frame")
+TitleBar.Parent = MainFrame
+TitleBar.Size = UDim2.new(1, 0, 0, 45)
+TitleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+TitleBar.BorderSizePixel = 0
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 8)
+TitleCorner.Parent = TitleBar
+
+local Title = Instance.new("TextLabel")
+Title.Parent = TitleBar
+Title.Size = UDim2.new(1, -80, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "ULTIMATE WARFARE"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Кнопка закрытия
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Parent = TitleBar
+CloseBtn.Size = UDim2.new(0, 35, 0, 35)
+CloseBtn.Position = UDim2.new(1, -45, 0.5, -17.5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 18
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.BorderSizePixel = 0
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseBtn
+
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+end)
+
+-- Вкладки
+local TabFrame = Instance.new("Frame")
+TabFrame.Parent = MainFrame
+TabFrame.Size = UDim2.new(1, -20, 0, 40)
+TabFrame.Position = UDim2.new(0, 10, 0, 50)
+TabFrame.BackgroundTransparency = 1
+
+local function createTab(name, pos, color)
+    local tab = Instance.new("TextButton")
+    tab.Parent = TabFrame
+    tab.Size = UDim2.new(0, 100, 0, 35)
+    tab.Position = UDim2.new(0, pos, 0, 0)
+    tab.BackgroundColor3 = color
+    tab.Text = name
+    tab.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tab.TextSize = 14
+    tab.Font = Enum.Font.GothamBold
+    tab.BorderSizePixel = 0
+    
+    local tabCorner = Instance.new("UICorner")
+    tabCorner.CornerRadius = UDim.new(0, 6)
+    tabCorner.Parent = tab
+    
+    return tab
+end
+
+local tab1 = createTab("MAIN", 0, Color3.fromRGB(70, 130, 200))
+local tab2 = createTab("MOVEMENT", 105, Color3.fromRGB(60, 200, 60))
+local tab3 = createTab("COMBAT", 210, Color3.fromRGB(200, 60, 60))
+local tab4 = createTab("TROLL", 315, Color3.fromRGB(160, 60, 200))
+
+-- Контейнеры для вкладок
+local Container1 = Instance.new("ScrollingFrame") -- MAIN
+local Container2 = Instance.new("ScrollingFrame") -- MOVEMENT
+local Container3 = Instance.new("ScrollingFrame") -- COMBAT
+local Container4 = Instance.new("ScrollingFrame") -- TROLL
+
+local containers = {Container1, Container2, Container3, Container4}
+
+for i, container in ipairs(containers) do
+    container.Parent = MainFrame
+    container.Size = UDim2.new(1, -20, 1, -100)
+    container.Position = UDim2.new(0, 10, 0, 95)
+    container.BackgroundTransparency = 1
+    container.BorderSizePixel = 0
+    container.ScrollBarThickness = 4
+    container.ScrollBarImageColor3 = Color3.fromRGB(40, 40, 45)
+    container.CanvasSize = UDim2.new(0, 0, 0, 0)
+    container.Visible = (i == 1)
+    
+    local layout = Instance.new("UIListLayout")
+    layout.Parent = container
+    layout.Padding = UDim.new(0, 8)
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        container.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+    end)
+end
+
+-- Переключение вкладок
+tab1.MouseButton1Click:Connect(function()
+    Container1.Visible = true
+    Container2.Visible = false
+    Container3.Visible = false
+    Container4.Visible = false
+end)
+
+tab2.MouseButton1Click:Connect(function()
+    Container1.Visible = false
+    Container2.Visible = true
+    Container3.Visible = false
+    Container4.Visible = false
+end)
+
+tab3.MouseButton1Click:Connect(function()
+    Container1.Visible = false
+    Container2.Visible = false
+    Container3.Visible = true
+    Container4.Visible = false
+end)
+
+tab4.MouseButton1Click:Connect(function()
+    Container1.Visible = false
+    Container2.Visible = false
+    Container3.Visible = false
+    Container4.Visible = true
+end)
+
+-- ==================== ФУНКЦИИ ====================
+local function notify(text)
+    local msg = Instance.new("Message")
+    msg.Parent = workspace
+    msg.Text = text
+    wait(1.5)
+    msg:Destroy()
+end
+
+local function createSection(container, title)
+    local section = Instance.new("Frame")
+    section.Parent = container
+    section.Size = UDim2.new(1, -5, 0, 0)
+    section.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    section.BorderSizePixel = 0
+    section.AutomaticSize = Enum.AutomaticSize.Y
+
+    local sectionCorner = Instance.new("UICorner")
+    sectionCorner.CornerRadius = UDim.new(0, 6)
+    sectionCorner.Parent = section
+
+    local sectionTitle = Instance.new("TextLabel")
+    sectionTitle.Parent = section
+    sectionTitle.Size = UDim2.new(1, -20, 0, 30)
+    sectionTitle.Position = UDim2.new(0, 10, 0, 5)
+    sectionTitle.BackgroundTransparency = 1
+    sectionTitle.Text = title
+    sectionTitle.TextColor3 = Color3.fromRGB(220, 220, 220)
+    sectionTitle.TextSize = 14
+    sectionTitle.Font = Enum.Font.GothamBold
+    sectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+    local content = Instance.new("Frame")
+    content.Parent = section
+    content.Size = UDim2.new(1, -20, 0, 0)
+    content.Position = UDim2.new(0, 10, 0, 35)
+    content.BackgroundTransparency = 1
+    content.AutomaticSize = Enum.AutomaticSize.Y
+
+    local contentList = Instance.new("UIListLayout")
+    contentList.Parent = content
+    contentList.Padding = UDim.new(0, 5)
+    contentList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+    return content
+end
+
+local function createToggle(parent, text, callback)
+    local frame = Instance.new("Frame")
+    frame.Parent = parent
+    frame.Size = UDim2.new(1, 0, 0, 35)
+    frame.BackgroundTransparency = 1
+
+    local label = Instance.new("TextLabel")
+    label.Parent = frame
+    label.Size = UDim2.new(0.7, -5, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    label.TextSize = 13
+    label.Font = Enum.Font.Gotham
+    label.TextXAlignment = Enum.TextXAlignment.Left
+
+    local btn = Instance.new("TextButton")
+    btn.Parent = frame
+    btn.Size = UDim2.new(0.3, -5, 0, 25)
+    btn.Position = UDim2.new(0.7, 0, 0.5, -12.5)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    btn.Text = "OFF"
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    btn.BorderSizePixel = 0
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 4)
+    btnCorner.Parent = btn
+
+    local state = false
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.BackgroundColor3 = state and Color3.fromRGB(60, 200, 60) or Color3.fromRGB(40, 40, 45)
+        btn.Text = state and "ON" or "OFF"
+        callback(state)
+    end)
+
+    return frame
+end
+
+local function createButton(parent, text, color, callback)
+    local btn = Instance.new("TextButton")
+    btn.Parent = parent
+    btn.Size = UDim2.new(1, 0, 0, 40)
+    btn.BackgroundColor3 = color
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 14
+    btn.Font = Enum.Font.GothamBold
+    btn.BorderSizePixel = 0
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        callback()
+        btn.BackgroundColor3 = color:lerp(Color3.new(1, 1, 1), 0.2)
+        wait(0.1)
+        btn.BackgroundColor3 = color
+    end)
+
+    return btn
+end
+
+-- ==================== FLY ====================
+local flyConnection = nil
+local bodyVelocity = nil
+local bodyGyro = nil
+
+local function toggleFly()
+    flyEnabled = not flyEnabled
+    
+    if flyEnabled then
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local root = player.Character.HumanoidRootPart
+            
+            bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.MaxForce = Vector3.new(1, 1, 1) * math.huge
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.Parent = root
+            
+            bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.MaxTorque = Vector3.new(1, 1, 1) * math.huge
+            bodyGyro.CFrame = root.CFrame
+            bodyGyro.Parent = root
+            
+            flyConnection = RunService.RenderStepped:Connect(function()
+                if not flyEnabled or not player.Character then
+                    toggleFly()
+                    return
+                end
+                
+                local moveDirection = Vector3.new(0, 0, 0)
+                local cameraCF = camera.CFrame
+                
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                    moveDirection = moveDirection + cameraCF.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                    moveDirection = moveDirection - cameraCF.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                    moveDirection = moveDirection - cameraCF.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                    moveDirection = moveDirection + cameraCF.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    moveDirection = moveDirection + Vector3.new(0, 1, 0)
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                    moveDirection = moveDirection - Vector3.new(0, 1, 0)
+                end
+                
+                if moveDirection.Magnitude > 0 then
+                    moveDirection = moveDirection.Unit * flySpeed
+                end
+                
+                bodyVelocity.Velocity = moveDirection
+                bodyGyro.CFrame = cameraCF
+            end)
+            
+            notify("✈️ Fly ON")
+        end
+    else
+        if bodyVelocity then
+            bodyVelocity:Destroy()
+            bodyVelocity = nil
+        end
+        if bodyGyro then
+            bodyGyro:Destroy()
+            bodyGyro = nil
+        end
+        if flyConnection then
+            flyConnection:Disconnect()
+            flyConnection = nil
+        end
+        notify("✈️ Fly OFF")
+    end
+end
+
+-- ==================== NOCLIP ====================
+local noclipConnection = nil
+
+local function toggleNoclip()
+    noclipEnabled = not noclipEnabled
+    
+    if noclipEnabled then
+        noclipConnection = RunService.Stepped:Connect(function()
+            if player.Character then
+                for _, part in ipairs(player.Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+        notify("🧱 Noclip ON")
+    else
+        if noclipConnection then
+            noclipConnection:Disconnect()
+            noclipConnection = nil
+        end
+        notify("🧱 Noclip OFF")
+    end
+end
+
+-- ==================== INFINITE JUMP ====================
+local infiniteJumpConnection = nil
+
+local function toggleInfiniteJump()
+    infiniteJumpEnabled = not infiniteJumpEnabled
+    
+    if infiniteJumpEnabled then
+        infiniteJumpConnection = UserInputService.JumpRequest:Connect(function()
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                player.Character.Humanoid:ChangeState("Jumping")
+            end
+        end)
+        notify("🦘 Infinite Jump ON")
+    else
+        if infiniteJumpConnection then
+            infiniteJumpConnection:Disconnect()
+            infiniteJumpConnection = nil
+        end
+        notify("🦘 Infinite Jump OFF")
+    end
+end
+
+-- ==================== SPEED ====================
+local function setSpeed(speed)
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = speed
+        player.Character.Humanoid.JumpPower = speed
+    end
+end
+
+local function toggleSpeed()
+    speedEnabled = not speedEnabled
+    setSpeed(speedEnabled and walkSpeed or 16)
+    notify(speedEnabled and "⚡ Speed ON" or "⚡ Speed OFF")
+end
+
+-- ==================== ESP ====================
+local function isPlayerAlive(character)
+    if not character then return false end
+    local humanoid = character:FindFirstChild("Humanoid")
+    if not humanoid then return false end
+    if humanoid.Health <= 0 then return false end
+    return true
+end
+
+local function createESP(char)
+    if not char then return nil end
+    
+    local highlight = Instance.new("Highlight")
+    highlight.Adornee = char
+    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+    highlight.FillTransparency = 0.3
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Parent = char
+    
+    local head = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
+    if head then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Adornee = head
+        billboard.Size = UDim2.new(0, 100, 0, 30)
+        billboard.StudsOffset = Vector3.new(0, 3, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = char
+        
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Parent = billboard
+        nameLabel.Size = UDim2.new(1, 0, 1, 0)
+        nameLabel.BackgroundTransparency = 0.5
+        nameLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        nameLabel.Text = char.Name
+        nameLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        nameLabel.TextSize = 14
+        nameLabel.Font = Enum.Font.GothamBold
+    end
+    
+    return highlight
+end
+
+local function toggleESP()
+    espEnabled = not espEnabled
+    
+    if espEnabled then
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= player and p.Character and isPlayerAlive(p.Character) then
+                espHighlights[p] = createESP(p.Character)
+            end
+        end
+        notify("👁️ ESP ON")
+    else
+        for _, h in pairs(espHighlights) do
+            pcall(function() h:Destroy() end)
+        end
+        espHighlights = {}
+        notify("👁️ ESP OFF")
+    end
+end
+
+-- ==================== БЫСТРЫЙ АВТО-КЛИКЕР ====================
+local clickConnection = nil
+local clickThread = nil
+
+local function toggleAutoClicker()
+    autoClickerEnabled = not autoClickerEnabled
+    
+    if autoClickerEnabled then
+        notify("🔫 Auto-clicker ON (G)")
+        
+        clickThread = coroutine.create(function()
+            while autoClickerEnabled do
+                for i = 1, 20 do
+                    mouse1click()
+                    mouse2click()
+                    
+                    if player.Character then
+                        for _, tool in ipairs(player.Character:GetChildren()) do
+                            if tool:IsA("Tool") then
+                                pcall(function()
+                                    tool:Activate()
+                                    if tool:FindFirstChild("ClickDetector") then
+                                        fireclickdetector(tool.ClickDetector)
+                                    end
+                                end)
+                            end
+                        end
+                    end
+                    
+                    wait(0.001)
+                end
+                wait(0.01)
+            end
+        end)
+        
+        coroutine.resume(clickThread)
+        
+        clickConnection = RunService.Heartbeat:Connect(function()
+            if autoClickerEnabled then
+                mouse1click()
+                wait(0.005)
+            end
+        end)
+        
+    else
+        notify("🔫 Auto-clicker OFF")
+        autoClickerEnabled = false
+        if clickConnection then
+            clickConnection:Disconnect()
+            clickConnection = nil
+        end
+        clickThread = nil
+    end
+end
+
+-- ==================== AUTO BOMBS ====================
+local bombConnection = nil
+
+local function findBombInHand()
+    if player.Character then
+        for _, tool in ipairs(player.Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                local name = tool.Name:lower()
+                if name:find("bomb") or name:find("boom") or name:find("tnt") or name:find("explosive") then
+                    return tool
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function spawnBombAtTargetWithFlight()
+    if not teamBases[targetTeam] then return false end
+    
+    local bomb = findBombInHand()
+    if not bomb then return false end
+    
+    local targetPos = teamBases[targetTeam]
+    local myRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return false end
+    
+    local myPos = myRoot.Position
+    local baseY = targetPos.Y
+    local time = tick()
+    
+    local heightOffset = math.sin(time * 3) * bombHeight
+    local flyPos = Vector3.new(targetPos.X, baseY + 30 + heightOffset, targetPos.Z)
+    
+    myRoot.CFrame = CFrame.new(flyPos)
+    wait(0.1)
+    
+    bomb:Activate()
+    mouse1click()
+    mouse2click()
+    
+    wait(0.1)
+    myRoot.CFrame = CFrame.new(myPos)
+    
+    return true
+end
+
+local function toggleAutoBombs()
+    spawnBombsEnabled = not spawnBombsEnabled
+    
+    if spawnBombsEnabled then
+        if not teamBases[targetTeam] then
+            notify("❌ Target base not found!")
+            spawnBombsEnabled = false
+            return
+        end
+        
+        if not findBombInHand() then
+            notify("❌ Take a bomb in your hand!")
+            spawnBombsEnabled = false
+            return
+        end
+        
+        notify("💣 Auto bombs ON (B) - Flying up & down")
+        
+        bombConnection = RunService.Heartbeat:Connect(function()
+            if spawnBombsEnabled then
+                spawnBombAtTargetWithFlight()
+                wait(0.5)
+            end
+        end)
+    else
+        notify("💣 Auto bombs OFF")
+        if bombConnection then
+            bombConnection:Disconnect()
+            bombConnection = nil
+        end
+    end
+end
+
+-- ==================== SPAWNER DESTROYER ====================
+local destroyConnection = nil
+local destroyedCount = 0
+
+local function isSpawner(obj)
+    if not obj then return false end
+    
+    local name = obj.Name:lower()
+    for _, keyword in ipairs(spawnerKeywords) do
+        if name:find(keyword) then
+            return true
+        end
+    end
+    
+    if obj:IsA("SpawnLocation") then return true end
+    if obj:IsA("TeamSpawn") then return true end
+    
+    return false
+end
+
+local function destroySpawnersAtBase(basePos)
+    local found = 0
+    
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") or obj:IsA("Model") or obj:IsA("SpawnLocation") then
+            local objPos = nil
+            if obj:IsA("BasePart") then
+                objPos = obj.Position
+            elseif obj:IsA("Model") and obj:FindFirstChild("PrimaryPart") then
+                objPos = obj.PrimaryPart.Position
+            elseif obj:IsA("SpawnLocation") then
+                objPos = obj.Position
+            end
+            
+            if objPos and isSpawner(obj) then
+                local dist = (objPos - basePos).Magnitude
+                if dist < scanRadius then
+                    pcall(function()
+                        obj:Destroy()
+                        found = found + 1
+                    end)
+                end
+            end
+        end
+    end
+    
+    return found
+end
+
+local function teleportAndDestroy()
+    if not teamBases[targetTeam] then return 0 end
+    
+    local targetPos = teamBases[targetTeam]
+    local myRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return 0 end
+    
+    local myPos = myRoot.Position
+    myRoot.CFrame = CFrame.new(targetPos + Vector3.new(0, 20, 0))
+    wait(0.2)
+    
+    local count = destroySpawnersAtBase(targetPos)
+    
+    wait(0.2)
+    myRoot.CFrame = CFrame.new(myPos)
+    
+    return count
+end
+
+local function toggleDestroyMode()
+    destroyModeEnabled = not destroyModeEnabled
+    
+    if destroyModeEnabled then
+        if not teamBases[targetTeam] then
+            notify("❌ Choose target team!")
+            destroyModeEnabled = false
+            return
+        end
+        
+        destroyedCount = 0
+        notify("💥 Destroy mode ON (X) - Target: " .. targetTeam)
+        
+        destroyConnection = RunService.Heartbeat:Connect(function()
+            if destroyModeEnabled then
+                local count = teleportAndDestroy()
+                destroyedCount = destroyedCount + count
+                wait(1)
+            end
+        end)
+    else
+        notify("💥 Destroy mode OFF. Destroyed: " .. destroyedCount)
+        if destroyConnection then
+            destroyConnection:Disconnect()
+            destroyConnection = nil
+        end
+    end
+end
+
+-- ==================== TELEPORT ====================
+local function teleportToBase(team)
+    local basePos = teamBases[team]
+    if not basePos then
+        notify("❌ No coordinates")
+        return
+    end
+    
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(basePos + Vector3.new(0, 5, 0))
+        notify("✨ Teleported to " .. team)
+    end
+end
+
+-- ==================== TROLL FUNCTIONS ====================
+local function findNearestPlayer()
+    local closest = nil
+    local closestDist = math.huge
+    
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+        return nil
+    end
+    
+    local myPos = player.Character.HumanoidRootPart.Position
+    
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (p.Character.HumanoidRootPart.Position - myPos).Magnitude
+            if dist < closestDist then
+                closestDist = dist
+                closest = p
+            end
+        end
+    end
+    
+    return closest
+end
+
+local function freezePlayer(targetPlayer)
+    if targetPlayer and targetPlayer.Character then
+        for _, part in ipairs(targetPlayer.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Anchored = true
+            end
+        end
+        notify("❄️ Frozen " .. targetPlayer.Name)
+    end
+end
+
+local function unfreezePlayer(targetPlayer)
+    if targetPlayer and targetPlayer.Character then
+        for _, part in ipairs(targetPlayer.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Anchored = false
+            end
+        end
+    end
+end
+
+local function launchPlayer(targetPlayer)
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        targetPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(0, 100, 0)
+        notify("🚀 Launched " .. targetPlayer.Name)
+    end
+end
+
+local function spinPlayer(targetPlayer)
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local root = targetPlayer.Character.HumanoidRootPart
+        for i = 1, 20 do
+            root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(18), 0)
+            wait(0.05)
+        end
+    end
+end
+
+local function shrinkPlayer(targetPlayer)
+    if targetPlayer and targetPlayer.Character then
+        for _, part in ipairs(targetPlayer.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Size = part.Size * 0.5
+            end
+        end
+        notify("🐁 Shrunk " .. targetPlayer.Name)
+    end
+end
+
+-- ==================== СОЗДАНИЕ ИНТЕРФЕЙСА ====================
+
+-- ВКЛАДКА MAIN
+local mainSection1 = createSection(Container1, "BASE TELEPORT")
+
+local teleportGrid = Instance.new("Frame")
+teleportGrid.Parent = mainSection1
+teleportGrid.Size = UDim2.new(1, 0, 0, 90)
+teleportGrid.BackgroundTransparency = 1
+
+local teleportLayout = Instance.new("UIGridLayout")
+teleportLayout.Parent = teleportGrid
+teleportLayout.CellSize = UDim2.new(0, 80, 0, 40)
+teleportLayout.CellPadding = UDim2.new(0, 5, 0, 5)
+
+local tpRed = createButton(teleportGrid, "RED", Color3.fromRGB(200, 60, 60), function() teleportToBase("Red") end)
+tpRed.Size = UDim2.new(0, 80, 0, 40)
+local tpBlue = createButton(teleportGrid, "BLUE", Color3.fromRGB(60, 60, 200), function() teleportToBase("Blue") end)
+tpBlue.Size = UDim2.new(0, 80, 0, 40)
+local tpYellow = createButton(teleportGrid, "YELLOW", Color3.fromRGB(200, 200, 60), function() teleportToBase("Yellow") end)
+tpYellow.Size = UDim2.new(0, 80, 0, 40)
+local tpGreen = createButton(teleportGrid, "GREEN", Color3.fromRGB(60, 200, 60), function() teleportToBase("Green") end)
+tpGreen.Size = UDim2.new(0, 80, 0, 40)
+
+-- Team selection
+local teamSection1 = createSection(Container1, "MY TEAM")
+local teamGrid1 = Instance.new("Frame")
+teamGrid1.Parent = teamSection1
+teamGrid1.Size = UDim2.new(1, 0, 0, 45)
+teamGrid1.BackgroundTransparency = 1
+
+local teamLayout1 = Instance.new("UIGridLayout")
+teamLayout1.Parent = teamGrid1
+teamLayout1.CellSize = UDim2.new(0, 70, 0, 40)
+teamLayout1.CellPadding = UDim2.new(0, 5, 0, 0)
+
+local myRed = createButton(teamGrid1, "RED", Color3.fromRGB(200, 60, 60), function() myTeam = "Red" end)
+myRed.Size = UDim2.new(0, 70, 0, 40)
+local myBlue = createButton(teamGrid1, "BLUE", Color3.fromRGB(60, 60, 200), function() myTeam = "Blue" end)
+myBlue.Size = UDim2.new(0, 70, 0, 40)
+local myYellow = createButton(teamGrid1, "YELLOW", Color3.fromRGB(200, 200, 60), function() myTeam = "Yellow" end)
+myYellow.Size = UDim2.new(0, 70, 0, 40)
+local myGreen = createButton(teamGrid1, "GREEN", Color3.fromRGB(60, 200, 60), function() myTeam = "Green" end)
+myGreen.Size = UDim2.new(0, 70, 0, 40)
+
+local teamSection2 = createSection(Container1, "TARGET TEAM")
+local teamGrid2 = Instance.new("Frame")
+teamGrid2.Parent = teamSection2
+teamGrid2.Size = UDim2.new(1, 0, 0, 45)
+teamGrid2.BackgroundTransparency = 1
+
+local teamLayout2 = Instance.new("UIGridLayout")
+teamLayout2.Parent = teamGrid2
+teamLayout2.CellSize = UDim2.new(0, 70, 0, 40)
+teamLayout2.CellPadding = UDim2.new(0, 5, 0, 0)
+
+local targetRed = createButton(teamGrid2, "RED", Color3.fromRGB(200, 60, 60), function() targetTeam = "Red" end)
+targetRed.Size = UDim2.new(0, 70, 0, 40)
+local targetBlue = createButton(teamGrid2, "BLUE", Color3.fromRGB(60, 60, 200), function() targetTeam = "Blue" end)
+targetBlue.Size = UDim2.new(0, 70, 0, 40)
+local targetYellow = createButton(teamGrid2, "YELLOW", Color3.fromRGB(200, 200, 60), function() targetTeam = "Yellow" end)
+targetYellow.Size = UDim2.new(0, 70, 0, 40)
+local targetGreen = createButton(teamGrid2, "GREEN", Color3.fromRGB(60, 200, 60), function() targetTeam = "Green" end)
+targetGreen.Size = UDim2.new(0, 70, 0, 40)
+
+-- Auto functions
+local mainSection2 = createSection(Container1, "AUTO FUNCTIONS")
+createToggle(mainSection2, "Auto Clicker (G)", function(state) 
+    if state then toggleAutoClicker() else toggleAutoClicker() end
+end)
+createToggle(mainSection2, "Auto Bombs (B)", function(state)
+    if state then toggleAutoBombs() else toggleAutoBombs() end
+end)
+createToggle(mainSection2, "Spawner Destroyer (X)", function(state)
+    if state then toggleDestroyMode() else toggleDestroyMode() end
+end)
+
+-- ESP
+local mainSection3 = createSection(Container1, "VISUAL")
+createToggle(mainSection3, "ESP (H)", function(state) toggleESP() end)
+
+-- ВКЛАДКА MOVEMENT
+local moveSection1 = createSection(Container2, "MOVEMENT HACKS")
+createToggle(moveSection1, "Fly (F)", function(state) toggleFly() end)
+createToggle(moveSection1, "Noclip (N)", function(state) toggleNoclip() end)
+createToggle(moveSection1, "Infinite Jump (J)", function(state) toggleInfiniteJump() end)
+createToggle(moveSection1, "Super Speed", function(state) toggleSpeed() end)
+
+-- ВКЛАДКА COMBAT
+local combatSection1 = createSection(Container3, "COMBAT")
+createButton(combatSection1, "🔫 Auto Clicker (G)", Color3.fromRGB(200, 60, 60), toggleAutoClicker)
+createButton(combatSection1, "💣 Auto Bombs (B)", Color3.fromRGB(200, 60, 60), toggleAutoBombs)
+createButton(combatSection1, "💥 Destroy Spawners (X)", Color3.fromRGB(200, 60, 60), toggleDestroyMode)
+createButton(combatSection1, "👁️ ESP (H)", Color3.fromRGB(70, 130, 200), toggleESP)
+
+-- ВКЛАДКА TROLL
+local trollSection1 = createSection(Container4, "TROLL NEAREST PLAYER")
+
+createButton(trollSection1, "❄️ Freeze", Color3.fromRGB(60, 60, 200), function()
+    local target = findNearestPlayer()
+    if target then freezePlayer(target) end
+end)
+
+createButton(trollSection1, "🚀 Launch", Color3.fromRGB(200, 120, 60), function()
+    local target = findNearestPlayer()
+    if target then launchPlayer(target) end
+end)
+
+createButton(trollSection1, "🌀 Spin", Color3.fromRGB(160, 60, 200), function()
+    local target = findNearestPlayer()
+    if target then spinPlayer(target) end
+end)
+
+createButton(trollSection1, "🐁 Shrink", Color3.fromRGB(60, 200, 60), function()
+    local target = findNearestPlayer()
+    if target then shrinkPlayer(target) end
+end)
+
+createButton(trollSection1, "💀 Kill", Color3.fromRGB(200, 60, 60), function()
+    local target = findNearestPlayer()
+    if target and target.Character then
+        target.Character:BreakJoints()
+        notify("💀 Killed " .. target.Name)
+    end
+end)
+
+createButton(trollSection1, "✨ Unfreeze All", Color3.fromRGB(70, 130, 200), function()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player then
+            unfreezePlayer(p)
+        end
+    end
+    notify("✨ All unfrozen")
+end)
+
+-- Radius control for destroyer
+local radiusSection = createSection(Container4, "DESTROYER RADIUS")
+local radiusFrame = Instance.new("Frame")
+radiusFrame.Parent = radiusSection
+radiusFrame.Size = UDim2.new(1, 0, 0, 40)
+radiusFrame.BackgroundTransparency = 1
+
+local radiusLabel = Instance.new("TextLabel")
+radiusLabel.Parent = radiusFrame
+radiusLabel.Size = UDim2.new(0.5, 0, 1, 0)
+radiusLabel.BackgroundTransparency = 1
+radiusLabel.Text = "Radius: " .. scanRadius
+radiusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+radiusLabel.TextSize = 14
+radiusLabel.Font = Enum.Font.GothamBold
+radiusLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local radiusMinus = createButton(radiusFrame, "-", Color3.fromRGB(60, 60, 60), function()
+    scanRadius = math.max(30, scanRadius - 10)
+    radiusLabel.Text = "Radius: " .. scanRadius
+end)
+radiusMinus.Size = UDim2.new(0.2, 0, 0, 30)
+radiusMinus.Position = UDim2.new(0.6, 0, 0.5, -15)
+
+local radiusPlus = createButton(radiusFrame, "+", Color3.fromRGB(60, 60, 60), function()
+    scanRadius = math.min(200, scanRadius + 10)
+    radiusLabel.Text = "Radius: " .. scanRadius
+end)
+radiusPlus.Size = UDim2.new(0.2, 0, 0, 30)
+radiusPlus.Position = UDim2.new(0.8, 0, 0.5, -15)
+
+-- Height control for bombs
+local heightSection = createSection(Container4, "BOMB FLIGHT HEIGHT")
+local heightFrame = Instance.new("Frame")
+heightFrame.Parent = heightSection
+heightFrame.Size = UDim2.new(1, 0, 0, 40)
+heightFrame.BackgroundTransparency = 1
+
+local heightLabel = Instance.new("TextLabel")
+heightLabel.Parent = heightFrame
+heightLabel.Size = UDim2.new(0.5, 0, 1, 0)
+heightLabel.BackgroundTransparency = 1
+heightLabel.Text = "Height: " .. bombHeight
+heightLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+heightLabel.TextSize = 14
+heightLabel.Font = Enum.Font.GothamBold
+heightLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local heightMinus = createButton(heightFrame, "-", Color3.fromRGB(60, 60, 60), function()
+    bombHeight = math.max(10, bombHeight - 10)
+    heightLabel.Text = "Height: " .. bombHeight
+end)
+heightMinus.Size = UDim2.new(0.2, 0, 0, 30)
+heightMinus.Position = UDim2.new(0.6, 0, 0.5, -15)
+
+local heightPlus = createButton(heightFrame, "+", Color3.fromRGB(60, 60, 60), function()
+    bombHeight = math.min(100, bombHeight + 10)
+    heightLabel.Text = "Height: " .. bombHeight
+end)
+heightPlus.Size = UDim2.new(0.2, 0, 0, 30)
+heightPlus.Position = UDim2.new(0.8, 0, 0.5, -15)
+
+-- ==================== ГОРЯЧИЕ КЛАВИШИ ====================
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.F1 then
+        MainFrame.Visible = not MainFrame.Visible
+    elseif input.KeyCode == Enum.KeyCode.G then
+        toggleAutoClicker()
+    elseif input.KeyCode == Enum.KeyCode.B then
+        toggleAutoBombs()
+    elseif input.KeyCode == Enum.KeyCode.X then
+        toggleDestroyMode()
+    elseif input.KeyCode == Enum.KeyCode.H then
+        toggleESP()
+    elseif input.KeyCode == Enum.KeyCode.F then
+        toggleFly()
+    elseif input.KeyCode == Enum.KeyCode.N then
+        toggleNoclip()
+    elseif input.KeyCode == Enum.KeyCode.J then
+        toggleInfiniteJump()
+    end
+end)
+
+-- Создаем кнопку для телефона
+createMobileButton()
+
+print("✅ ULTIMATE WARFARE READY")
+print("   F1 - Menu")
+print("   G - Auto Clicker")
+print("   B - Auto Bombs (Flying up & down)")
+print("   X - Destroy Spawners")
+print("   H - ESP")
+print("   F - Fly")
+print("   N - Noclip")
+print("   J - Infinite Jump")
+if TouchEnabled then
+    print("   ⚡ Button - Menu (Phone)")
+end

@@ -1,4 +1,4 @@
--- ULTIMATE BASE WARFARE - ИСПРАВЛЕННАЯ ТЕЛЕФОННАЯ ВЕРСИЯ
+-- ULTIMATE BASE WARFARE - ИСПРАВЛЕННАЯ ТЕЛЕФОННАЯ КНОПКА
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -64,23 +64,25 @@ local function createMobileButton()
     buttonGui.ResetOnSpawn = false
     buttonGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     buttonGui.DisplayOrder = 999
+    buttonGui.IgnoreGuiInset = true
     
     menuButton = Instance.new("TextButton")
     menuButton.Parent = buttonGui
-    menuButton.Size = UDim2.new(0, 70, 0, 70)
-    menuButton.Position = UDim2.new(0.85, -35, 0.1, 35)
-    menuButton.BackgroundColor3 = Color3.fromRGB(70, 130, 200)
+    menuButton.Size = UDim2.new(0, 50, 0, 50)  -- Маленькая кнопка 50x50
+    menuButton.Position = UDim2.new(0.9, -25, 0.1, 25)  -- В правом верхнем углу
+    menuButton.BackgroundColor3 = Color3.fromRGB(70, 130, 200)  -- Синий
     menuButton.Text = "⚡"
     menuButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    menuButton.TextSize = 40
+    menuButton.TextSize = 30
     menuButton.Font = Enum.Font.GothamBold
     menuButton.BorderSizePixel = 0
-    menuButton.Draggable = true
+    menuButton.Draggable = true  -- Можно перетаскивать
     menuButton.Active = true
-    menuButton.ZIndex = 10
+    menuButton.ZIndex = 1000
     
+    -- Скругленные углы
     local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 35)
+    btnCorner.CornerRadius = UDim.new(0, 25)  -- Круглая кнопка
     btnCorner.Parent = menuButton
     
     -- Тень
@@ -94,20 +96,16 @@ local function createMobileButton()
     shadow.ImageTransparency = 0.5
     shadow.ScaleType = Enum.ScaleType.Slice
     shadow.SliceCenter = Rect.new(10, 10, 118, 118)
-    shadow.ZIndex = 0
+    shadow.ZIndex = 999
     
-    -- Обработка касания для телефона
+    -- Функция открытия/закрытия меню
     local function toggleMenu()
         MainFrame.Visible = not MainFrame.Visible
     end
     
-    -- Для телефона используем TouchTap
-    if TouchEnabled then
-        menuButton.TouchTap:Connect(toggleMenu)
-    end
-    
-    -- Для ПК/мыши
-    menuButton.MouseButton1Click:Connect(toggleMenu)
+    -- Обработка нажатия на телефоне
+    menuButton.MouseButton1Click:Connect(toggleMenu)  -- Для мыши
+    menuButton.TouchTap:Connect(toggleMenu)  -- Для касания
     
     -- Делаем кнопку всегда видимой
     menuButton.Visible = true
@@ -122,8 +120,8 @@ ScreenGui.DisplayOrder = 998
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 450, 0, 650)
-MainFrame.Position = UDim2.new(0.5, -225, 0.5, -325)
+MainFrame.Size = UDim2.new(0, 400, 0, 550)  -- Поменьше для телефона
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -275)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -138,10 +136,9 @@ MainCorner.Parent = MainFrame
 -- Заголовок
 local TitleBar = Instance.new("Frame")
 TitleBar.Parent = MainFrame
-TitleBar.Size = UDim2.new(1, 0, 0, 45)
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
 TitleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
 TitleBar.BorderSizePixel = 0
-TitleBar.ZIndex = 21
 
 local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 8)
@@ -149,42 +146,50 @@ TitleCorner.Parent = TitleBar
 
 local Title = Instance.new("TextLabel")
 Title.Parent = TitleBar
-Title.Size = UDim2.new(1, -80, 1, 0)
-Title.Position = UDim2.new(0, 15, 0, 0)
+Title.Size = UDim2.new(1, -60, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "ULTIMATE WARFARE"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 20
+Title.TextSize = 16
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.ZIndex = 22
 
 -- Кнопка закрытия
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = TitleBar
-CloseBtn.Size = UDim2.new(0, 35, 0, 35)
-CloseBtn.Position = UDim2.new(1, -45, 0.5, -17.5)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0.5, -15)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
 CloseBtn.Text = "✕"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.TextSize = 18
+CloseBtn.TextSize = 16
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.BorderSizePixel = 0
-CloseBtn.ZIndex = 22
 
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.CornerRadius = UDim.new(0, 4)
 CloseCorner.Parent = CloseBtn
 
--- Обработка закрытия для телефона
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+end)
 if TouchEnabled then
     CloseBtn.TouchTap:Connect(function()
         MainFrame.Visible = false
     end)
 end
-CloseBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
-end)
+
+-- Контейнер с прокруткой (остальной код такой же как в предыдущей версии)
+-- ... (здесь идет весь остальной код функций)
+
+-- Создаем кнопку для телефона
+createMobileButton()
+
+print("✅ ULTIMATE WARFARE READY")
+if TouchEnabled then
+    print("   📱 Нажми на синюю кнопку ⚡ чтобы открыть меню")
+end
 
 -- Вкладки
 local TabFrame = Instance.new("Frame")

@@ -1,4 +1,4 @@
--- ULTIMATE BASE WARFARE - ПОЛНАЯ ВЕРСИЯ 1000+ СТРОК
+-- ULTIMATE BASE WARFARE - ПОЛНАЯ ВЕРСИЯ С ВКЛАДКАМИ
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -170,7 +170,7 @@ if TouchEnabled then
     end)
 end
 
--- Вкладки
+-- ==================== ВКЛАДКИ (ВЕРХНИЕ КНОПКИ) ====================
 local TabFrame = Instance.new("Frame")
 TabFrame.Parent = MainFrame
 TabFrame.Size = UDim2.new(1, -20, 0, 40)
@@ -188,6 +188,7 @@ local function createTab(name, pos, color)
     tab.TextSize = 14
     tab.Font = Enum.Font.GothamBold
     tab.BorderSizePixel = 0
+    tab.ZIndex = 22
     
     local tabCorner = Instance.new("UICorner")
     tabCorner.CornerRadius = UDim.new(0, 6)
@@ -196,12 +197,13 @@ local function createTab(name, pos, color)
     return tab
 end
 
+-- Создаем 4 вкладки
 local tab1 = createTab("MAIN", 0, Color3.fromRGB(70, 130, 200))
 local tab2 = createTab("MOVE", 95, Color3.fromRGB(60, 200, 60))
 local tab3 = createTab("COMBAT", 190, Color3.fromRGB(200, 60, 60))
 local tab4 = createTab("TROLL", 285, Color3.fromRGB(160, 60, 200))
 
--- Контейнеры
+-- ==================== КОНТЕЙНЕРЫ ДЛЯ ВКЛАДОК ====================
 local Container1 = Instance.new("ScrollingFrame")
 local Container2 = Instance.new("ScrollingFrame")
 local Container3 = Instance.new("ScrollingFrame")
@@ -218,7 +220,7 @@ for i, container in ipairs(containers) do
     container.ScrollBarThickness = 4
     container.ScrollBarImageColor3 = Color3.fromRGB(40, 40, 45)
     container.CanvasSize = UDim2.new(0, 0, 0, 0)
-    container.Visible = (i == 1)
+    container.Visible = (i == 1) -- Показываем только первую вкладку
     container.ZIndex = 21
     
     local layout = Instance.new("UIListLayout")
@@ -231,7 +233,7 @@ for i, container in ipairs(containers) do
     end)
 end
 
--- Переключение вкладок
+-- ==================== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ====================
 local function switchTab(index)
     for i, container in ipairs(containers) do
         container.Visible = (i == index)
@@ -863,7 +865,7 @@ local function killPlayer(targetPlayer)
     end
 end
 
--- ==================== ИНТЕРФЕЙС MAIN TAB ====================
+-- ==================== MAIN TAB CONTENT ====================
 local mainSection1 = createSection(Container1, "BASE TELEPORT")
 
 local teleportGrid = Instance.new("Frame")
@@ -942,7 +944,7 @@ end)
 local mainSection3 = createSection(Container1, "VISUAL")
 createToggle(mainSection3, "ESP (H)", function(state) toggleESP() end)
 
--- ==================== MOVEMENT TAB ====================
+-- ==================== MOVE TAB CONTENT ====================
 local moveSection1 = createSection(Container2, "MOVEMENT HACKS")
 createToggle(moveSection1, "Fly (F)", function(state) 
     if state then 
@@ -973,14 +975,14 @@ createToggle(moveSection1, "Super Speed", function(state)
     end
 end)
 
--- ==================== COMBAT TAB ====================
+-- ==================== COMBAT TAB CONTENT ====================
 local combatSection1 = createSection(Container3, "COMBAT")
 createButton(combatSection1, "🔫 Auto Clicker (G)", Color3.fromRGB(200, 60, 60), function() toggleAutoClicker() end)
 createButton(combatSection1, "💣 Auto Bombs (B)", Color3.fromRGB(200, 60, 60), function() toggleAutoBombs() end)
 createButton(combatSection1, "💥 Destroy Spawners (X)", Color3.fromRGB(200, 60, 60), function() toggleDestroyMode() end)
 createButton(combatSection1, "👁️ ESP (H)", Color3.fromRGB(70, 130, 200), function() toggleESP() end)
 
--- ==================== TROLL TAB ====================
+-- ==================== TROLL TAB CONTENT ====================
 local trollSection1 = createSection(Container4, "TROLL NEAREST PLAYER")
 
 createButton(trollSection1, "❄️ Freeze", Color3.fromRGB(60, 60, 200), function()
